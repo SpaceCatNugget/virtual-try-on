@@ -1,0 +1,282 @@
+{
+  "76": {
+    "inputs": {
+      "image": "target.png"
+    },
+    "class_type": "LoadImage",
+    "_meta": { "title": "Load Target Image" }
+  },
+  "81": {
+    "inputs": {
+      "image": "clothing.png"
+    },
+    "class_type": "LoadImage",
+    "_meta": { "title": "Load Clothing Reference Image" }
+  },
+  "99": {
+    "inputs": {
+      "sampler_name": "euler"
+    },
+    "class_type": "KSamplerSelect",
+    "_meta": { "title": "KSamplerSelect" }
+  },
+  "100": {
+    "inputs": {
+      "steps": 8,
+      "width": ["115", 0],
+      "height": ["115", 1]
+    },
+    "class_type": "Flux2Scheduler",
+    "_meta": { "title": "Flux2Scheduler" }
+  },
+  "101": {
+    "inputs": {
+      "cfg": 1,
+      "model": ["116", 0],
+      "positive": ["112:139", 0],
+      "negative": ["112:137", 0]
+    },
+    "class_type": "CFGGuider",
+    "_meta": { "title": "CFGGuider" }
+  },
+  "102": {
+    "inputs": {
+      "noise": ["104", 0],
+      "guider": ["101", 0],
+      "sampler": ["99", 0],
+      "sigmas": ["100", 0],
+      "latent_image": ["120", 0]
+    },
+    "class_type": "SamplerCustomAdvanced",
+    "_meta": { "title": "SamplerCustomAdvanced" }
+  },
+  "103": {
+    "inputs": {
+      "samples": ["102", 0],
+      "vae": ["108", 0]
+    },
+    "class_type": "VAEDecode",
+    "_meta": { "title": "VAE Decode" }
+  },
+  "104": {
+    "inputs": {
+      "noise_seed": 248575667574619
+    },
+    "class_type": "RandomNoise",
+    "_meta": { "title": "RandomNoise" }
+  },
+  "106": {
+    "inputs": {
+      "clip_name": "qwen_3_4b.safetensors",
+      "type": "flux2",
+      "device": "default"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": { "title": "Load CLIP" }
+  },
+  "107": {
+    "inputs": {
+      "text": "start with Picture 1 as the base image, keeping its lighting, environment, and background. remove the cloth from Picture 1 completely and replace it with the cloth from Picture 2, strictly preserving the cloth color, material and design of Picture 2. copy the cloth from Picture 2, match the pose from Picture 1 to subject's entire body, high quality, sharp details, 4k. Describe the expression in Picture 1 and copy it to the new image.",
+      "clip": ["106", 0]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": { "title": "Prompt" }
+  },
+  "108": {
+    "inputs": {
+      "vae_name": "flux2-vae.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": { "title": "Load VAE" }
+  },
+  "109": {
+    "inputs": {
+      "upscale_method": "nearest-exact",
+      "megapixels": 1,
+      "resolution_steps": 1,
+      "image": ["76", 0]
+    },
+    "class_type": "ImageScaleToTotalPixels",
+    "_meta": { "title": "Scale Target Image" }
+  },
+  "110": {
+    "inputs": {
+      "upscale_method": "nearest-exact",
+      "megapixels": 1,
+      "resolution_steps": 1,
+      "image": ["135:133", 0]
+    },
+    "class_type": "ImageScaleToTotalPixels",
+    "_meta": { "title": "Scale Clothing Image" }
+  },
+  "113": {
+    "inputs": {
+      "conditioning": ["107", 0]
+    },
+    "class_type": "ConditioningZeroOut",
+    "_meta": { "title": "ConditioningZeroOut" }
+  },
+  "115": {
+    "inputs": {
+      "image": ["109", 0]
+    },
+    "class_type": "GetImageSize",
+    "_meta": { "title": "Get Image Size" }
+  },
+  "116": {
+    "inputs": {
+      "unet_name": "flux-2-klein-4b-Q8_0.gguf"
+    },
+    "class_type": "UnetLoaderGGUF",
+    "_meta": { "title": "Unet Loader (GGUF)" }
+  },
+  "120": {
+    "inputs": {
+      "width": 832,
+      "height": 1216,
+      "batch_size": 1
+    },
+    "class_type": "EmptyFlux2LatentImage",
+    "_meta": { "title": "Empty Flux 2 Latent" }
+  },
+  "123": {
+    "inputs": {
+      "lora_name": "aura-pvc-2-_00010e_074520s.safetensors",
+      "strength_model": 1
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": { "title": "Load LoRA" }
+  },
+  "124": {
+    "inputs": {
+      "lora_name": "aura-pvc-2-_00010e_074520s.safetensors",
+      "strength_model": 1
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": { "title": "Load LoRA" }
+  },
+  "128": {
+    "inputs": {
+      "precision": "auto",
+      "compile": false
+    },
+    "class_type": "LoadSAM3Model",
+    "_meta": { "title": "SAM3 Model" }
+  },
+  "140": {
+    "inputs": {
+      "filename_prefix": "cloth_swap",
+      "images": ["103", 0]
+    },
+    "class_type": "SaveImage",
+    "_meta": { "title": "Save Result" }
+  },
+  "135:133": {
+    "inputs": {
+      "force_resize_width": 0,
+      "force_resize_height": 0,
+      "image": ["135:131", 0],
+      "mask": ["135:130", 0]
+    },
+    "class_type": "Cut By Mask",
+    "_meta": { "title": "Cut By Mask" }
+  },
+  "135:132": {
+    "inputs": {
+      "mask": ["135:130", 1]
+    },
+    "class_type": "InvertMask",
+    "_meta": { "title": "Invert Mask" }
+  },
+  "135:131": {
+    "inputs": {
+      "color": "255, 255, 255",
+      "device": "cpu",
+      "image": ["135:130", 0],
+      "mask": ["135:132", 0]
+    },
+    "class_type": "DrawMaskOnImage",
+    "_meta": { "title": "Draw Mask On Image" }
+  },
+  "135:129": {
+    "inputs": {
+      "confidence_threshold": 0.2,
+      "text_prompt": "clothing, garment, outfit, shirt, pants, dress, jacket",
+      "max_detections": -1,
+      "sam3_model_config": ["128", 0],
+      "image": ["81", 0]
+    },
+    "class_type": "SAM3Grounding",
+    "_meta": { "title": "SAM3 Text Segmentation" }
+  },
+  "135:130": {
+    "inputs": {
+      "face": false,
+      "hair": false,
+      "body": false,
+      "clothes": true,
+      "accessories": false,
+      "background": false,
+      "confidence": 0.45,
+      "detail_method": "VITMatte",
+      "detail_erode": 6,
+      "detail_dilate": 6,
+      "black_point": 0.01,
+      "white_point": 0.99,
+      "process_detail": true,
+      "device": "cpu",
+      "max_megapixels": 2,
+      "images": ["135:129", 1]
+    },
+    "class_type": "LayerMask: PersonMaskUltra V2",
+    "_meta": { "title": "LayerMask: PersonMaskUltra V2" }
+  },
+  "111:136": {
+    "inputs": {
+      "conditioning": ["113", 0],
+      "latent": ["111:78", 0]
+    },
+    "class_type": "ReferenceLatent",
+    "_meta": { "title": "ReferenceLatent" }
+  },
+  "111:78": {
+    "inputs": {
+      "pixels": ["109", 0],
+      "vae": ["108", 0]
+    },
+    "class_type": "VAEEncode",
+    "_meta": { "title": "VAE Encode" }
+  },
+  "111:77": {
+    "inputs": {
+      "conditioning": ["107", 0],
+      "latent": ["111:78", 0]
+    },
+    "class_type": "ReferenceLatent",
+    "_meta": { "title": "ReferenceLatent" }
+  },
+  "112:137": {
+    "inputs": {
+      "conditioning": ["111:136", 0],
+      "latent": ["112:138", 0]
+    },
+    "class_type": "ReferenceLatent",
+    "_meta": { "title": "ReferenceLatent" }
+  },
+  "112:138": {
+    "inputs": {
+      "pixels": ["110", 0],
+      "vae": ["108", 0]
+    },
+    "class_type": "VAEEncode",
+    "_meta": { "title": "VAE Encode" }
+  },
+  "112:139": {
+    "inputs": {
+      "conditioning": ["111:77", 0],
+      "latent": ["112:138", 0]
+    },
+    "class_type": "ReferenceLatent",
+    "_meta": { "title": "ReferenceLatent" }
+  }
+}
